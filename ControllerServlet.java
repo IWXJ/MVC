@@ -1,12 +1,12 @@
 package controller;
 
+import Entity.AddPizza;
 import Entity.ListBasket;
 import Entity.AddToBasket;
 import Entity.Login;
 import Entity.ListPizzas;
 import Entity.ConfirmOrder;
 import Entity.CreateCustomer;
-import Entity.PizzaObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -108,7 +108,6 @@ public class ControllerServlet extends HttpServlet {
        
 // TO DO: 
 // Kode til at håndtere bladring
-        
         session.setAttribute("cartList", returnObject);
         userPath = pageCart;
     }    
@@ -159,7 +158,21 @@ public class ControllerServlet extends HttpServlet {
     }    
 
     private void showMenuadmin(HttpServletRequest request, HttpServletResponse response) {
-        showMenu(request, response);
+        Object pizzaList = null;
+
+        ListPizzas lp = new ListPizzas();
+        try {
+            pizzaList = lp.getPizza("name");
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ControllerServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+// TO DO: 
+// Kode til at håndtere bladring
+        HttpSession session = request.getSession();
+        session.setAttribute("pizzaList", pizzaList);
+        userPath = pageMenuAdmin;
+
     }    
 
     private void showLogin(HttpServletRequest request, HttpServletResponse response) {
@@ -198,20 +211,15 @@ public class ControllerServlet extends HttpServlet {
     
     private void doDeleteItemFromList(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
-        String itemName = request.getParameter("item");
+        String itemName = (String)request.getParameter("item");
         if (itemName == null || itemName == "") {
             return;
         }
 
-//        for (Iterator<PizzaObject> iterator = pizzaList.iterator(); iterator.hasNext();) {
-//            PizzaObject next = iterator.next();
-//            if (next.getName().equalsIgnoreCase(itemName)) {
-//                pizzaList.remove(next);
-//            }
-//        }
+        AddPizza ab = new AddPizza();
+        ab.deletePizza(itemName);
         
-//        session.setAttribute("pizzaList", pizzaList);
-        userPath = pageMenuAdmin;
+        showMenuadmin(request, response);
     }
     
     private void doRegisterUser(HttpServletRequest request, HttpServletResponse response) {
@@ -263,27 +271,27 @@ public class ControllerServlet extends HttpServlet {
     }
     
     private void doAddItemToList(HttpServletRequest request, HttpServletResponse response) {
-//        String itemName = request.getParameter("name");
-//        String itemDescription = request.getParameter("description");
-//        Double itemPrice = 0.00;
-//        
-//        try {
-//            itemPrice = Double.parseDouble(request.getParameter("price"));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return;
-//        }
-//        
-//        if (!(itemName == null || itemName == "" || itemDescription == null || itemDescription == "")) {
-//            return;
-//        }
-//        
-//        PizzaObject p = new PizzaObject(itemName, itemDescription, itemPrice);
-//        pizzaList.add(p);
-//
-//        HttpSession session = request.getSession();
-//        session.setAttribute("pizzaList", pizzaList);
-//        userPath = pageMenuAdmin;
+        String name = null;
+        String desc = null;
+        Double price = null;   
+        Object result = null;
+
+        if(request.getParameter("name") != null) {
+            name = request.getParameter("name");
+        } 
+
+        if(request.getParameter("description") != null) {
+            desc = request.getParameter("description");
+        } 
+
+        if(request.getParameter("name") != null) {
+            price = Double.parseDouble(request.getParameter("price"));
+        } 
+
+        AddPizza ap = new AddPizza();
+        result = ap.addPizza(name, desc, price);
+        
+        showMenuadmin(request, response);
     }
     
     private void doSortMenu(HttpServletRequest request, HttpServletResponse response) {
